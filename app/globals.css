@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-poppins: 'Poppins', system-ui, -apple-system, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-inter);
+    @apply bg-slate-50 text-slate-800 transition-colors duration-200;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-poppins);
+  }
+
+  /* Keyboard Navigation Focus Indicators (Accessibility) */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+  }
+
+  /* High Contrast Mode Support */
+  @media (forced-colors: active) {
+    *:focus-visible {
+      outline: 2px solid SelectedText;
+      outline-offset: 2px;
+    }
+    .btn-primary, .btn-secondary, .btn-emergency {
+      border: 1px solid currentColor;
+    }
+  }
+}
+
+@layer utilities {
+  /* Accessibility: Adjustable Text Size Utility classes */
+  .text-size-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+  }
+  .text-size-base {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+  }
+  .text-size-lg {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.75rem;
+  }
+  .text-size-xl {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.875rem;
+  }
+  .text-size-2xl {
+    font-size: 1.5rem; /* 24px */
+    line-height: 2rem;
+  }
+}
