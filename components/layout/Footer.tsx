@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import NextLink from "next/link";
+import Link from "next/link";
 import {
   MapPin,
   Phone,
@@ -9,11 +9,11 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Youtube,
   Linkedin,
   Send,
-  Stethoscope,
+  Smile,
   Clock,
+  ChevronRight,
 } from "lucide-react";
 import { siteConfig } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
@@ -21,66 +21,92 @@ import { Button } from "@/components/ui/Button";
 export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
-      // Simulate newsletter signup
-      setSubscribed(true);
-      setEmail("");
+    setError("");
+
+    if (!email.trim()) {
+      setError("Please enter an email address");
+      return;
     }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    // Simulate newsletter signup
+    setSubscribed(true);
+    setEmail("");
+    setTimeout(() => setSubscribed(false), 3000);
   };
 
-  const socialIcons = {
-    facebook: <Facebook className="h-5 w-5" />,
-    instagram: <Instagram className="h-5 w-5" />,
-    twitter: <Twitter className="h-5 w-5" />,
-    youtube: <Youtube className="h-5 w-5" />,
-    linkedin: <Linkedin className="h-5 w-5" />,
-  };
+  const socialLinks = [
+    { icon: Facebook, label: "Facebook", url: siteConfig.social.facebook },
+    { icon: Instagram, label: "Instagram", url: siteConfig.social.instagram },
+    { icon: Twitter, label: "Twitter", url: siteConfig.social.twitter },
+    { icon: Linkedin, label: "LinkedIn", url: siteConfig.social.linkedin },
+  ];
+
+  const quickLinks = [
+    { label: "Services", href: "/services" },
+    { label: "Our Team", href: "/dentists" },
+    { label: "About", href: "/about" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Blog", href: "/blog" },
+    { label: "Offers", href: "/offers" },
+  ];
+
+  const legalLinks = [
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Accessibility", href: "/accessibility-statement" },
+    { label: "Sitemap", href: "/sitemap" },
+  ];
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800" aria-labelledby="footer-heading">
+    <footer className="bg-slate-900 text-slate-300 mt-20" aria-labelledby="footer-heading">
       <h2 id="footer-heading" className="sr-only">Footer</h2>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-          
-          {/* Column 1: Logo & Tagline */}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+        {/* Main Footer Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+          {/* Column 1: Brand */}
           <div className="space-y-6">
-            <NextLink href="/" className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-brand-500 rounded-md inline-block">
-              <div className="bg-brand-500 text-white p-2 rounded-lg">
-                <Stethoscope className="h-6 w-6" aria-hidden="true" />
+            <Link
+              href="/"
+              className="flex items-center gap-3 group focus-visible:ring-2 focus-visible:ring-brand-500 rounded-lg p-1 w-fit"
+              aria-label="Bright Smile Dental Home"
+            >
+              <div className="bg-brand-600 text-white p-2 rounded-lg group-hover:bg-brand-700 transition-all duration-200">
+                <Smile className="h-6 w-6" aria-hidden="true" />
               </div>
               <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-xl tracking-tight text-white">
-                  Bright Smile
-                </span>
-                <span className="text-xs uppercase tracking-widest text-brand-400 font-bold -mt-1">
-                  Dental Clinic
-                </span>
+                <span className="font-heading font-bold text-white">Bright Smile</span>
+                <span className="text-xs text-brand-400 font-semibold">Dental Clinic</span>
               </div>
-            </NextLink>
+            </Link>
 
-            <p className="text-sm text-slate-400 leading-relaxed">
-              {siteConfig.tagline || "Providing personalized, high-quality dental care for families in our community. Your comfort and bright smile are our top priorities."}
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+              {siteConfig.tagline || "Providing personalized, high-quality dental care for families. Your smile is our priority."}
             </p>
 
-            {/* Social Media Links */}
-            <div className="flex space-x-4">
-              {Object.entries(siteConfig.social).map(([platform, url]) => {
-                const icon = socialIcons[platform as keyof typeof socialIcons];
-                if (!icon || !url) return null;
+            {/* Social Links */}
+            <div className="flex gap-3 pt-2">
+              {socialLinks.map(({ icon: Icon, label, url }) => {
+                if (!url) return null;
                 return (
                   <a
-                    key={platform}
+                    key={label}
                     href={url}
-                    className="p-2 bg-slate-800 text-slate-400 rounded-full hover:bg-brand-500 hover:text-white transition-all duration-200"
+                    className="p-2.5 bg-slate-800 text-slate-400 rounded-lg hover:bg-brand-600 hover:text-white transition-all duration-200 focus-visible:ring-2 focus-visible:ring-brand-500"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`Visit our ${platform} page`}
+                    aria-label={`Visit our ${label} page`}
                   >
-                    {icon}
+                    <Icon className="h-5 w-5" />
                   </a>
                 );
               })}
@@ -89,88 +115,67 @@ export default function Footer() {
 
           {/* Column 2: Quick Links */}
           <div>
-            <h3 className="font-heading font-bold text-lg text-white mb-6 flex items-center gap-2">
-              <span>Quick Links</span>
-            </h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <NextLink href="/services" className="hover:text-brand-400 transition-colors">
-                  Our Dental Services
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/dentists" className="hover:text-brand-400 transition-colors">
-                  Meet Our Dentists
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/about" className="hover:text-brand-400 transition-colors">
-                  About Our Practice
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/gallery" className="hover:text-brand-400 transition-colors">
-                  Patient Gallery
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/blog" className="hover:text-brand-400 transition-colors">
-                  Dental Health Blog
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/offers" className="hover:text-brand-400 transition-colors">
-                  Special Offers & Deals
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/booking" className="hover:text-brand-400 transition-colors font-semibold text-brand-400">
-                  Book an Appointment
-                </NextLink>
-              </li>
+            <h3 className="font-heading font-bold text-white mb-4 text-lg">Quick Links</h3>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-brand-400 transition-colors group"
+                  >
+                    <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Column 3: Contact Info & Address */}
+          {/* Column 3: Contact Info */}
           <div className="space-y-6">
-            <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <span>Contact Details</span>
-            </h3>
-            
+            <h3 className="font-heading font-bold text-white text-lg">Contact</h3>
+
             <div className="space-y-4 text-sm">
               {/* Address */}
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" />
+              <div className="flex gap-3">
+                <MapPin className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <span className="block font-semibold text-white">Our Office</span>
+                  <p className="font-semibold text-white block mb-1">Location</p>
                   <a
-                    href="https://maps.google.com"
+                    href={`https://maps.google.com/?q=${encodeURIComponent(
+                      `${siteConfig.address.street}, ${siteConfig.address.city}, ${siteConfig.address.state}`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-brand-400 transition-colors"
+                    className="text-slate-400 hover:text-brand-400 transition-colors"
                   >
-                    {siteConfig.address.street}, {siteConfig.address.city}, {siteConfig.address.state} {siteConfig.address.zip}
+                    {siteConfig.address.street}
+                    <br />
+                    {siteConfig.address.city}, {siteConfig.address.state} {siteConfig.address.zip}
                   </a>
                 </div>
               </div>
 
               {/* Phone */}
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" />
+              <div className="flex gap-3">
+                <Phone className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <span className="block font-semibold text-white">Call Anytime</span>
-                  <a href={`tel:${siteConfig.phone.replace(/\D/g, "")}`} className="hover:text-brand-400 transition-colors text-base font-bold">
+                  <p className="font-semibold text-white block mb-1">Phone</p>
+                  <a
+                    href={`tel:${siteConfig.phone.replace(/\D/g, "")}`}
+                    className="text-slate-400 hover:text-brand-400 transition-colors font-semibold"
+                  >
                     {siteConfig.phone}
                   </a>
                 </div>
               </div>
 
               {/* Email */}
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" />
+              <div className="flex gap-3">
+                <Mail className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <span className="block font-semibold text-white">Email Us</span>
-                  <a href={`mailto:${siteConfig.email}`} className="hover:text-brand-400 transition-colors">
+                  <p className="font-semibold text-white block mb-1">Email</p>
+                  <a href={`mailto:${siteConfig.email}`} className="text-slate-400 hover:text-brand-400 transition-colors">
                     {siteConfig.email}
                   </a>
                 </div>
@@ -178,80 +183,86 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 4: Office Hours & Newsletter */}
+          {/* Column 4: Hours & Newsletter */}
           <div className="space-y-6">
-            <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <Clock className="h-5 w-5 text-brand-400" />
-              <span>Office Hours</span>
+            <h3 className="font-heading font-bold text-white flex items-center gap-2 text-lg">
+              <Clock className="h-5 w-5 text-brand-400" aria-hidden="true" />
+              Hours
             </h3>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left text-slate-400 border-collapse">
-                <tbody>
-                  {siteConfig.hours.map((row) => (
-                    <tr key={row.day} className="border-b border-slate-800 last:border-0">
-                      <td className="py-1.5 font-semibold text-slate-300 pr-2">{row.day}</td>
-                      <td className="py-1.5 text-right text-slate-400">{row.hours}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            {/* Office Hours */}
+            <div className="space-y-2">
+              {siteConfig.hours.map((row) => (
+                <div key={row.day} className="flex justify-between text-xs text-slate-400">
+                  <span className="font-semibold">{row.day}</span>
+                  <span>{row.hours}</span>
+                </div>
+              ))}
             </div>
 
-            {/* Newsletter Signup */}
-            <div className="pt-2 border-t border-slate-800">
-              <span className="block font-semibold text-sm text-white mb-2">Subscribe to our newsletter</span>
+            {/* Newsletter */}
+            <div className="pt-4 border-t border-slate-800">
+              <label htmlFor="newsletter-email" className="block text-sm font-semibold text-white mb-3">
+                Stay Updated
+              </label>
               {subscribed ? (
-                <div className="text-xs text-brand-400 font-semibold bg-brand-950/40 p-2 rounded border border-brand-800">
-                  🎉 Thank you for subscribing!
+                <div className="text-sm text-brand-400 font-semibold bg-brand-950/50 p-3 rounded-lg border border-brand-800 animate-fade-in">
+                  ✓ Thank you for subscribing!
                 </div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex gap-2">
-                  <input
-                    type="email"
-                    required
-                    placeholder="Your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-slate-800 text-slate-100 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder-slate-500"
-                    aria-label="Email address for newsletter"
-                  />
-                  <button
-                    type="submit"
-                    className="p-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    aria-label="Subscribe"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
+                <form onSubmit={handleSubscribe} className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      id="newsletter-email"
+                      type="email"
+                      required
+                      placeholder="Your email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setError("");
+                      }}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-800 text-slate-100 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                      aria-label="Email address for newsletter"
+                    />
+                    <button
+                      type="submit"
+                      className="p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                      aria-label="Subscribe to newsletter"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {error && <p className="text-xs text-red-400">{error}</p>}
                 </form>
               )}
             </div>
           </div>
-
         </div>
 
-        {/* Bottom Bar with Footer Navigation and copyright */}
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            <NextLink href="/privacy-policy" className="hover:text-slate-300 transition-colors">
-              Privacy Policy
-            </NextLink>
-            <NextLink href="/terms" className="hover:text-slate-300 transition-colors">
-              Terms of Service
-            </NextLink>
-            <NextLink href="/accessibility-statement" className="hover:text-slate-300 transition-colors">
-              Accessibility Statement
-            </NextLink>
-            <NextLink href="/sitemap" className="hover:text-slate-300 transition-colors">
-              Sitemap
-            </NextLink>
+        {/* Divider */}
+        <div className="border-t border-slate-800 pt-8">
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Legal Links */}
+            <nav className="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-2 text-xs">
+              {legalLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Copyright */}
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            </p>
           </div>
-
-          <p className="text-center md:text-right">
-            &copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-          </p>
         </div>
-
       </div>
     </footer>
   );
