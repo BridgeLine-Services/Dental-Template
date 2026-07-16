@@ -1,71 +1,91 @@
 import { siteConfig } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
-import { Phone, Calendar, Star, Shield, Award, ChevronDown } from "lucide-react";
+import { Phone, Calendar, Star, Sparkles, ArrowRight } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Background image with overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1629909613654-28e8f3a6f5f8?w=1920&q=80"
-          alt="Modern dental office"
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-950/90 via-brand-900/80 to-brand-800/70" />
-      </div>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      {/* Background with subtle gradient */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-slate-50 via-white to-brand-50/30" />
+      
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-brand-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+      <div className="absolute -bottom-8 left-10 w-72 h-72 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+      <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-slate-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-5xl px-4 py-20 text-center text-white">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-          <Star className="h-4 w-4 fill-accent-400 text-accent-400" />
-          <span>{siteConfig.rating} Google Rating • {siteConfig.reviewCount} Reviews</span>
+      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center py-20">
+        {/* Badge */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-brand-100/80 backdrop-blur-md px-4 py-2 text-sm font-semibold text-brand-700 border border-brand-200/50 animate-fade-in-up">
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          <span>Trusted by {siteConfig.reviewCount}+ patients</span>
         </div>
 
-        <h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
-          Your Smile, <span className="text-accent-400">Our Passion</span>
+        {/* Main Headline */}
+        <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-slate-900 mb-6 animate-fade-in-up animation-delay-1000">
+          Your Smile,{" "}
+          <span className="bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent">
+            Our Passion
+          </span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-white/90 sm:text-xl">
-          Comprehensive, compassionate dental care for the whole family. From routine cleanings to complete
-          smile makeovers, we're here to keep you smiling for life.
+        {/* Subheading */}
+        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-8 leading-relaxed animate-fade-in-up animation-delay-2000">
+          Comprehensive, compassionate dental care for the whole family. From routine cleanings to complete smile transformations, we're committed to keeping you smiling for life.
         </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button href="/booking" size="lg" variant="primary">
-            <Calendar className="mr-2 h-5 w-5" />
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in-up animation-delay-3000">
+          <Button href="/booking" size="lg" variant="primary" className="group">
+            <Calendar className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
             Book Appointment
           </Button>
-          <Button href={`tel:${siteConfig.phone}`} size="lg" variant="secondary" className="border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20">
-            <Phone className="mr-2 h-5 w-5" />
-            Call Now
+          <Button 
+            href={`tel:${siteConfig.phone.replace(/\D/g, "")}`} 
+            size="lg" 
+            variant="ghost"
+            className="group border-2 border-slate-200 hover:border-brand-500"
+          >
+            <Phone className="mr-2 h-5 w-5 group-hover:text-brand-600 transition-colors" />
+            <span>Call: {siteConfig.phone}</span>
           </Button>
         </div>
 
-        {/* Trust badges */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-white/80">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-accent-400" />
-            ADA Member
+        {/* Trust Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12 animate-fade-in-up animation-delay-4000">
+          <div className="card-minimal">
+            <div className="text-3xl font-bold text-brand-600 mb-1">{siteConfig.rating}★</div>
+            <p className="text-sm text-slate-600">Google Rating</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-accent-400" />
-            25+ Years Experience
+          <div className="card-minimal">
+            <div className="text-3xl font-bold text-brand-600 mb-1">{siteConfig.yearsInBusiness}+</div>
+            <p className="text-sm text-slate-600">Years Experience</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-accent-400" />
-            15,000+ Patients Served
+          <div className="card-minimal">
+            <div className="text-3xl font-bold text-brand-600 mb-1">{siteConfig.patientsServed}</div>
+            <p className="text-sm text-slate-600">Patients Served</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-accent-400" />
-            Most Insurance Accepted
+          <div className="card-minimal">
+            <div className="text-3xl font-bold text-brand-600 mb-1">24/7</div>
+            <p className="text-sm text-slate-600">Emergency Care</p>
           </div>
+        </div>
+
+        {/* Highlight section */}
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-slate-100 p-8 mb-8 animate-fade-in-up animation-delay-5000">
+          <p className="text-slate-700 font-medium flex items-center justify-center gap-2">
+            <span className="inline-block w-2 h-2 bg-brand-600 rounded-full" />
+            ADA Accredited • Gentle Care • Advanced Technology • Insurance Welcome
+          </p>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-        <ChevronDown className="h-6 w-6 text-white/60" />
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce hidden md:block">
+        <div className="flex flex-col items-center gap-2 text-slate-500">
+          <span className="text-sm font-medium">Scroll to explore</span>
+          <ArrowRight className="h-5 w-5 rotate-90" aria-hidden="true" />
+        </div>
       </div>
     </section>
   );
