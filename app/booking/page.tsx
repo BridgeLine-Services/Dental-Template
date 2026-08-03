@@ -1,432 +1,211 @@
-'use client';
-
-import React, { useState } from 'react';
-import { services, dentists, siteConfig } from '@/lib/data';
-import { 
-  CheckCircle, ArrowLeft, ArrowRight, Calendar as CalendarIcon, 
-  Clock, Shield, User, HelpCircle, Loader2, Sparkles 
-} from 'lucide-react';
+"use client";
+import { useState, useEffect } from "react";
+import { services, dentists, siteConfig } from "@/lib/data";
 
 export default function BookingPage() {
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [complete, setComplete] = useState(false);
+  const [serviceSlug, setServiceSlug] = useState("");
+  const [dentistId, setDentistId] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [isNewPatient, setIsNewPatient] = useState(true);
+  const [insuranceProvider, setInsuranceProvider] = useState("");
+  const [patientName, setPatientName] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
+  const [patientPhone, setPatientPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmation, setConfirmation] = useState<any>(null);
+  const [error, setError] = useState("");
 
-  // Form Fields State
-  const [formData, setFormData] = useState({
-    patientType: 'new', // new | returning
-    serviceSlug: '',
-    dentistId: '',
-    date: '',
-    timeSlot: '',
-    insuranceProvider: '',
-    policyNumber: '',
-    patientName: '',
-    patientEmail: '',
-    patientPhone: '',
-  });
+  const selectedService = services.find(s => s.slug === serviceSlug);
+  const selectedDentist = dentists.find(d => d.id === dentistId);
 
-  const stepsCount = 6;
-
-  // Handle value change
-  const updateField = (field: string, val: string) => {
-    setFormData((prev) => ({ ...prev, [field]: val }));
-  };
-
-  // Mock available time slots
-  const timeSlots = [
-    "08:30 AM", "09:30 AM", "10:30 AM", "11:30 AM",
-    "01:30 PM", "02:30 PM", "03:30 PM", "04:30 PM"
-  ];
-
-  // Progression checks
-  const canGoNext = () => {
-    switch (step) {
-      case 1:
-        return !!formData.patientType;
-      case 2:
-        return !!formData.serviceSlug;
-      case 3:
-        return !!formData.dentistId;
-      case 4:
-        return !!formData.date && !!formData.timeSlot;
-      case 5:
-        return !!formData.patientName && !!formData.patientEmail && !!formData.patientPhone;
-      default:
-        return true;
+  useEffect(() => {
+    if (dentistId && date) {
+      setLoadingSlots(true);
+      setAvailableSlots([]);
+      setError("");
+      fetch("https://app.base44.com/api/apps/6a57e26859533eb5e679dee8/functions/checkAvailability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dentistId, date, serviceSlug }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setAvailableSlots(data.availableSlots || []);
+          else setAvailableSlots(["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"]);
+        })
+        .catch(() => setAvailableSlots(["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"]))
+        .finally(() => setLoadingSlots(false));
     }
-  };
+  }, [dentistId, date, serviceSlug]);
 
-  const handleNext = () => {
-    if (step < stepsCount) {
-      setStep(step + 1);
-    } else {
-      handleFinalSubmit();
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  const handleFinalSubmit = async () => {
-    setLoading(true);
-    // Simulate booking API save
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError("");
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setComplete(true);
-    } catch (err) {
-      alert("Registration failed. Please contact the office.");
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch("https://app.base44.com/api/apps/6a57e26859533eb5e679dee8/functions/bookAppointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientName, patientEmail, patientPhone,
+          dentistId, dentistName: selectedDentist?.name || "",
+          serviceSlug, serviceName: selectedService?.title || "",
+          date, time,
+          isNewPatient, insuranceProvider, notes,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) { setConfirmation(data); setStep(5); }
+      else setError(data.error || "Failed to book appointment");
+    } catch { setError("Network error. Please call (555) 123-4567 to book."); }
+    setSubmitting(false);
   };
 
-  const selectedService = services.find(s => s.slug === formData.serviceSlug);
-  const selectedDentist = dentists.find(d => d.id === formData.dentistId);
+  const steps = ["Service", "Dentist", "Date & Time", "Your Info"];
+  const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="bg-slate-50 min-h-screen py-16 md:py-24">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Booking Card Frame */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          
-          {/* Header Progress Bar */}
-          {!complete && (
-            <div className="bg-slate-900 px-8 py-6 text-white relative">
-              <span className="text-xs font-bold text-brand-400 uppercase tracking-widest">
-                Step {step} of {stepsCount}
-              </span>
-              <h1 className="text-2xl font-bold mt-1">Book Your Dental Appointment</h1>
-              
-              {/* Progress Bar Container */}
-              <div className="mt-4 w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-brand-500 transition-all duration-300"
-                  style={{ width: `${(step / stepsCount) * 100}%` }}
-                ></div>
+    <div className="bg-gray-50 min-h-screen">
+      <section className="bg-brand-900 text-white py-12">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <h1 className="text-3xl font-bold mb-2">Book an Appointment</h1>
+          <p className="text-brand-200">Schedule your visit in 4 easy steps</p>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        {confirmation ? (
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="text-2xl font-bold text-brand-900 mb-2">Appointment Request Received!</h2>
+            <p className="text-gray-600 mb-6">{confirmation.message}</p>
+            <div className="bg-gray-50 rounded-xl p-6 text-left mb-6">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <p><span className="text-gray-500">Patient:</span> <span className="font-medium">{patientName}</span></p>
+                <p><span className="text-gray-500">Service:</span> <span className="font-medium">{selectedService?.title}</span></p>
+                <p><span className="text-gray-500">Dentist:</span> <span className="font-medium">{selectedDentist?.name}</span></p>
+                <p><span className="text-gray-500">Date:</span> <span className="font-medium">{date}</span></p>
+                <p><span className="text-gray-500">Time:</span> <span className="font-medium">{time}</span></p>
+                <p><span className="text-gray-500">Patient Type:</span> <span className="font-medium">{isNewPatient ? "New" : "Returning"}</span></p>
               </div>
             </div>
-          )}
-
-          {/* Form Core Panel */}
-          {complete ? (
-            <div className="p-8 sm:p-12 text-center space-y-6 py-16">
-              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-extrabold">✓</div>
-              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Appointment Requested!</h2>
-              <p className="text-slate-600 max-w-md mx-auto text-sm leading-relaxed">
-                Thank you, <strong className="text-slate-900">{formData.patientName}</strong>. Your provisional slot has been reserved. A booking coordinator will contact you via email or SMS shortly to verify health details and finalize your visit.
-              </p>
-
-              {/* Summary Receipt */}
-              <div className="max-w-md mx-auto bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left space-y-3.5 mt-8">
-                <h3 className="font-bold text-slate-800 text-sm border-b pb-2 uppercase tracking-wide">Reserved Details:</h3>
-                
-                <div className="grid grid-cols-2 text-sm">
-                  <span className="text-slate-400">Dentist:</span>
-                  <span className="font-semibold text-slate-800 text-right">{selectedDentist?.name}</span>
+            <p className="text-gray-500 text-sm mb-4">A confirmation email has been sent to {patientEmail}. We'll confirm within 2 hours.</p>
+            <a href="/" className="inline-block bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-lg font-medium">Return Home</a>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            {/* Progress bar */}
+            <div className="flex items-center justify-between mb-8">
+              {steps.map((label, i) => (
+                <div key={i} className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step > i + 1 ? "bg-green-500 text-white" : step === i + 1 ? "bg-brand-600 text-white" : "bg-gray-200 text-gray-500"}`}>
+                    {step > i + 1 ? "✓" : i + 1}
+                  </div>
+                  <span className={`ml-2 text-sm ${step === i + 1 ? "font-bold text-brand-900" : "text-gray-500"} hidden sm:inline`}>{label}</span>
+                  {i < steps.length - 1 && <div className={`w-8 sm:w-12 h-0.5 mx-2 ${step > i + 1 ? "bg-green-500" : "bg-gray-200"}`} />}
                 </div>
-                <div className="grid grid-cols-2 text-sm">
-                  <span className="text-slate-400">Service:</span>
-                  <span className="font-semibold text-slate-800 text-right">{selectedService?.title}</span>
-                </div>
-                <div className="grid grid-cols-2 text-sm">
-                  <span className="text-slate-400">Date:</span>
-                  <span className="font-semibold text-slate-800 text-right">{formData.date}</span>
-                </div>
-                <div className="grid grid-cols-2 text-sm">
-                  <span className="text-slate-400">Time:</span>
-                  <span className="font-semibold text-slate-800 text-right">{formData.timeSlot}</span>
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <a 
-                  href="/"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-brand-600 hover:bg-brand-700 transition-colors"
-                >
-                  Return to Home
-                </a>
-              </div>
+              ))}
             </div>
-          ) : (
-            <div className="p-8 sm:p-10 space-y-8 min-h-[400px]">
-              
-              {/* Step 1: Patient Status */}
-              {step === 1 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Are you a new or returning patient?</h3>
-                  <p className="text-sm text-slate-500">Select one to customize your initial check-in process.</p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => updateField('patientType', 'new')}
-                      className={`p-6 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all ${
-                        formData.patientType === 'new' 
-                          ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20' 
-                          : 'border-slate-200 hover:border-brand-200 bg-white'
-                      }`}
-                    >
-                      <span className="text-brand-600 font-extrabold text-lg">New Patient</span>
-                      <span className="text-xs text-slate-500">I have never visited this dental office before. Includes initial consultation files.</span>
+
+            {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">{error}</div>}
+
+            {/* Step 1: Service */}
+            {step === 1 && (
+              <div>
+                <h2 className="text-xl font-bold text-brand-900 mb-4">Select a Service</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {services.map(s => (
+                    <button key={s.slug} onClick={() => { setServiceSlug(s.slug); setStep(2); }}
+                      className={`text-left p-4 rounded-xl border-2 transition-all ${serviceSlug === s.slug ? "border-brand-600 bg-brand-50" : "border-gray-200 hover:border-brand-300"}`}>
+                      <p className="font-semibold text-gray-900">{s.title}</p>
+                      <p className="text-sm text-gray-500">{s.shortDescription}</p>
+                      <p className="text-xs text-brand-600 mt-1">From {s.startingPrice}</p>
                     </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                    <button
-                      onClick={() => updateField('patientType', 'returning')}
-                      className={`p-6 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all ${
-                        formData.patientType === 'returning' 
-                          ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20' 
-                          : 'border-slate-200 hover:border-brand-200 bg-white'
-                      }`}
-                    >
-                      <span className="text-brand-600 font-extrabold text-lg">Returning Patient</span>
-                      <span className="text-xs text-slate-500">I have received checkups or cleanings here previously.</span>
+            {/* Step 2: Dentist */}
+            {step === 2 && (
+              <div>
+                <h2 className="text-xl font-bold text-brand-900 mb-4">Choose Your Dentist</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button onClick={() => { setDentistId(""); setStep(3); }} className={`text-left p-4 rounded-xl border-2 ${dentistId === "" ? "border-brand-600 bg-brand-50" : "border-gray-200 hover:border-brand-300"}`}>
+                    <p className="font-semibold">No Preference</p><p className="text-sm text-gray-500">First available dentist</p>
+                  </button>
+                  {dentists.map(d => (
+                    <button key={d.id} onClick={() => { setDentistId(d.id); setStep(3); }}
+                      className={`text-left p-4 rounded-xl border-2 flex items-center gap-3 ${dentistId === d.id ? "border-brand-600 bg-brand-50" : "border-gray-200 hover:border-brand-300"}`}>
+                      <img src={d.photo} alt={d.name} className="w-12 h-12 rounded-full object-cover" />
+                      <div><p className="font-semibold text-gray-900">{d.name}</p><p className="text-sm text-gray-500">{d.title.split("—")[0]}</p></div>
                     </button>
-                  </div>
+                  ))}
                 </div>
-              )}
+                <button onClick={() => setStep(1)} className="mt-4 text-sm text-gray-500 hover:text-gray-700">← Back</button>
+              </div>
+            )}
 
-              {/* Step 2: Select Service */}
-              {step === 2 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Select your required dental service</h3>
-                  <p className="text-sm text-slate-500">Pick from our foundational and restorative clinical treatments.</p>
-                  
-                  <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2">
-                    {services.map((service) => (
-                      <button
-                        key={service.slug}
-                        onClick={() => updateField('serviceSlug', service.slug)}
-                        className={`p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          formData.serviceSlug === service.slug 
-                            ? 'border-brand-500 bg-brand-50/50 ring-1 ring-brand-500/20' 
-                            : 'border-slate-100 hover:border-brand-200 bg-white'
-                        }`}
-                      >
-                        <div>
-                          <p className="font-semibold text-slate-900 text-sm">{service.title}</p>
-                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{service.shortDescription}</p>
-                        </div>
-                        <span className="text-xs font-semibold text-slate-400">{service.startingPrice} starting</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Select Dentist */}
-              {step === 3 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Choose a Dentist</h3>
-                  <p className="text-sm text-slate-500">Select your preferred clinician or pick &apos;Any Doctor&apos; for maximum schedule flexibility.</p>
-                  
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {dentists.map((dentist) => (
-                      <button
-                        key={dentist.id}
-                        onClick={() => updateField('dentistId', dentist.id)}
-                        className={`p-5 rounded-2xl border text-left flex gap-4 items-center transition-all ${
-                          formData.dentistId === dentist.id 
-                            ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20' 
-                            : 'border-slate-200 hover:border-brand-200 bg-white'
-                        }`}
-                      >
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 relative flex-shrink-0">
-                          <img src={dentist.photo} alt={dentist.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{dentist.name}</p>
-                          <p className="text-[11px] text-brand-600 font-medium mt-0.5">{dentist.title}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Select Date & Time */}
-              {step === 4 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Select a Date & Time</h3>
-                  <p className="text-sm text-slate-500">Pick an open calendar slot that accommodates your calendar.</p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Date Input */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                        Appointment Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => updateField('date', e.target.value)}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm text-slate-800"
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-
-                    {/* Time slots */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                        Available Times
-                      </label>
-                      <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1">
-                        {timeSlots.map((slot) => (
-                          <button
-                            key={slot}
-                            onClick={() => updateField('timeSlot', slot)}
-                            className={`p-2.5 text-xs font-bold rounded-lg border text-center transition-all ${
-                              formData.timeSlot === slot 
-                                ? 'border-brand-500 bg-brand-50 text-brand-700 font-semibold' 
-                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-brand-200 hover:bg-white'
-                            }`}
-                          >
-                            {slot}
+            {/* Step 3: Date & Time */}
+            {step === 3 && (
+              <div>
+                <h2 className="text-xl font-bold text-brand-900 mb-4">Pick a Date & Time</h2>
+                <input type="date" min={today} value={date} onChange={e => setDate(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                {date && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Available Times:</p>
+                    {loadingSlots ? (
+                      <p className="text-gray-500">Checking availability...</p>
+                    ) : availableSlots.length > 0 ? (
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                        {availableSlots.map(slot => (
+                          <button key={slot} onClick={() => { setTime(slot); setStep(4); }}
+                            className={`py-2 rounded-lg border text-sm font-medium transition-all ${time === slot ? "border-brand-600 bg-brand-600 text-white" : "border-gray-200 hover:border-brand-300"}`}>
+                            {parseInt(slot) > 12 ? `${parseInt(slot) - 12}:00 PM` : `${parseInt(slot)}:00 AM`}
                           </button>
                         ))}
                       </div>
-                    </div>
+                    ) : (
+                      <p className="text-gray-500">No availability on this date. Please try another date.</p>
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Step 5: Insurance & Basic Patient Details */}
-              {step === 5 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Enter Your Details</h3>
-                  <p className="text-sm text-slate-500">Provide basic contact and optional insurance files to help us pre-verify benefits.</p>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">Full Name</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="John Doe"
-                          value={formData.patientName}
-                          onChange={(e) => updateField('patientName', e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs"
-                        />
-                      </div>
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">Email</label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="john@example.com"
-                          value={formData.patientEmail}
-                          onChange={(e) => updateField('patientEmail', e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs"
-                        />
-                      </div>
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">Phone</label>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="(555) 123-4567"
-                          value={formData.patientPhone}
-                          onChange={(e) => updateField('patientPhone', e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-100 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">Insurance Provider (Optional)</label>
-                        <input
-                          type="text"
-                          placeholder="Delta Dental, MetLife, etc."
-                          value={formData.insuranceProvider}
-                          onChange={(e) => updateField('insuranceProvider', e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-1">Policy Number (Optional)</label>
-                        <input
-                          type="text"
-                          placeholder="ID / Member Number"
-                          value={formData.policyNumber}
-                          onChange={(e) => updateField('policyNumber', e.target.value)}
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 6: Confirmation Summary */}
-              {step === 6 && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-slate-900">Verify Your Information</h3>
-                  <p className="text-sm text-slate-500">Please review all values for accuracy before submitting your reservation request.</p>
-
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                    <div className="grid grid-cols-2 text-sm pb-2 border-b border-dashed border-slate-200">
-                      <span className="text-slate-400">Patient Status:</span>
-                      <span className="font-semibold text-slate-800 text-right capitalize">{formData.patientType} Patient</span>
-                    </div>
-                    <div className="grid grid-cols-2 text-sm pb-2 border-b border-dashed border-slate-200">
-                      <span className="text-slate-400">Service requested:</span>
-                      <span className="font-semibold text-slate-800 text-right">{selectedService?.title}</span>
-                    </div>
-                    <div className="grid grid-cols-2 text-sm pb-2 border-b border-dashed border-slate-200">
-                      <span className="text-slate-400">Dentist Selected:</span>
-                      <span className="font-semibold text-slate-800 text-right">{selectedDentist?.name}</span>
-                    </div>
-                    <div className="grid grid-cols-2 text-sm pb-2 border-b border-dashed border-slate-200">
-                      <span className="text-slate-400">Date & Time:</span>
-                      <span className="font-semibold text-slate-800 text-right">{formData.date} at {formData.timeSlot}</span>
-                    </div>
-                    <div className="grid grid-cols-2 text-sm">
-                      <span className="text-slate-400">Contact:</span>
-                      <span className="font-semibold text-slate-800 text-right">{formData.patientName} ({formData.patientPhone})</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Control Navigation Buttons */}
-              <div className="flex justify-between items-center pt-8 border-t border-slate-100">
-                <button
-                  onClick={handleBack}
-                  disabled={step === 1}
-                  className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-brand-600 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                </button>
-
-                <button
-                  onClick={handleNext}
-                  disabled={!canGoNext() || loading}
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-brand-600 hover:bg-brand-700 transition-colors shadow-sm disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                      Booking...
-                    </>
-                  ) : step === stepsCount ? (
-                    'Confirm Reservation'
-                  ) : (
-                    <>
-                      Next <ArrowRight className="w-4 h-4 ml-1" />
-                    </>
-                  )}
-                </button>
+                )}
+                <button onClick={() => setStep(2)} className="mt-4 text-sm text-gray-500 hover:text-gray-700">← Back</button>
               </div>
+            )}
 
-            </div>
-          )}
-
-        </div>
+            {/* Step 4: Patient Info */}
+            {step === 4 && (
+              <div>
+                <h2 className="text-xl font-bold text-brand-900 mb-4">Your Information</h2>
+                <div className="space-y-3">
+                  <input type="text" placeholder="Full Name *" value={patientName} onChange={e => setPatientName(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                  <input type="email" placeholder="Email Address *" value={patientEmail} onChange={e => setPatientEmail(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                  <input type="tel" placeholder="Phone Number *" value={patientPhone} onChange={e => setPatientPhone(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2"><input type="radio" checked={isNewPatient} onChange={() => setIsNewPatient(true)} className="text-brand-600" /> New Patient</label>
+                    <label className="flex items-center gap-2"><input type="radio" checked={!isNewPatient} onChange={() => setIsNewPatient(false)} className="text-brand-600" /> Returning Patient</label>
+                  </div>
+                  <input type="text" placeholder="Insurance Provider (optional)" value={insuranceProvider} onChange={e => setInsuranceProvider(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                  <textarea placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 min-h-[80px] focus:ring-2 focus:ring-brand-400 focus:outline-none" />
+                </div>
+                <div className="flex justify-between mt-6">
+                  <button onClick={() => setStep(3)} className="text-sm text-gray-500 hover:text-gray-700">← Back</button>
+                  <button onClick={handleSubmit} disabled={!patientName || !patientEmail || !patientPhone || submitting}
+                    className="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-lg font-medium disabled:opacity-50">
+                    {submitting ? "Booking..." : "Confirm Appointment"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
