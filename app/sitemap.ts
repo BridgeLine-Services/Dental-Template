@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://brightsmiledental.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://brightsmiledental.com";
   const lastModified = new Date();
 
   const staticRoutes = [
@@ -9,7 +9,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/contact", "/faq", "/booking", "/emergency", "/resources", "/login",
     "/consent-forms", "/insurance-verification", "/smile-assessment",
     "/cost-estimator", "/telehealth", "/hipaa-notice", "/privacy-policy",
-    "/terms", "/accessibility", "/payment",
+    "/terms", "/accessibility", "/payment", "/membership", "/referral",
+    "/waitlist", "/financing-calculator", "/online-check-in", "/staff",
+    "/office-tour", "/multi-location", "/ai-receptionist",
+    "/forms/new-patient", "/forms/medical-history", "/forms/treatment-consent",
+    "/forms/xray-consent", "/forms/financial-policy", "/forms/insurance-assignment",
+    "/legal/cookie-policy", "/legal/disclaimer", "/legal/copyright", "/legal/dmca",
+    "/legal/data-retention", "/legal/ai-disclosure", "/legal/accessibility",
+    "/legal/no-medical-advice", "/legal/financial-policy", "/legal",
   ].map(route => ({ url: `${baseUrl}${route}`, lastModified, changeFrequency: "weekly" as const, priority: route === "" ? 1 : 0.8 }));
 
   const serviceSlugs = [

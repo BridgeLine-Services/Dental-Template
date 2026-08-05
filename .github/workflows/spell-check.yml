@@ -1,0 +1,11 @@
+name: Spell Check
+on: [push, pull_request]
+jobs:
+  spell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npx cspell "**/*.tsx" "**/*.ts" "**/*.md" --config cspell.json

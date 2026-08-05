@@ -1,0 +1,15 @@
+name: Security Headers Check
+on: [pull_request]
+jobs:
+  headers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build
+      - run: npm run start &
+      - name: Check headers
+        run: |
+          sleep 3
+          curl -sI http://localhost:3000 | grep -i "x-frame-options\|x-content-type-options\|strict-transport-security\|content-security-policy\|referrer-policy"

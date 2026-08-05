@@ -1,0 +1,25 @@
+name: Sitemap Validation
+on: [push]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build
+      - run: npm run start &
+      - name: Validate sitemap
+        run: |
+          sleep 3
+          npx tsx -e "
+            const res = await fetch('http://localhost:3000/sitemap.xml');
+            const xml = await res.text();
+            const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
+            console.log('Found', urls.length, 'URLs');
+            for (const url of urls) {
+              const r = await fetch(url, { method: 'HEAD' });
+              if (!r.ok) console.error('FAIL:', url, r.status);
+              else console.log('OK:', url);
+            }
+          "

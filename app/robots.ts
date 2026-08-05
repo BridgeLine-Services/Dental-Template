@@ -1,13 +1,13 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://brightsmiledental.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://brightsmiledental.com";
 
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/login/", "/portal/"],
+      disallow: ["/admin/", "/login/", "/portal/", "/api/"],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

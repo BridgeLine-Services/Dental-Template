@@ -1,0 +1,17 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "a11y", "APR", "authjs", "base44", "CareCredit", "CIGNA", "codegen",
+    "covid", "dentistry", "dentin", "extrac", "fluorosis", "gingivitis",
+    "halitosis", "HIPAA", "hygienist", "Implantology", "Invisalign",
+    "mandibular", "maxillary", "molar", "odontogenic", "orthodontic",
+    "orthognathic", "osseointegration", "pediatric", "periodontal",
+    "periodontitis", "periapical", "plaque", "prisma", "prophylaxis",
+    "prosthodontic", "pyorrhea", "radiograph", "recaldent", "Restorations",
+    "Sunbit", "temporomandibular", "tmj", "upstash", "veneers",
+    "xerostomia", "Zirconia", "TypeScript", "NextAuth", "Tailwind",
+    "PostgreSQL", "bcryptjs", "Turnstile", "cuid", "Supabase"
+  ],
+  "ignorePaths": ["node_modules/**", ".next/**", "build/**", "coverage/**"]
+}

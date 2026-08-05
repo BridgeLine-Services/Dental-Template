@@ -1,0 +1,11 @@
+name: Link Checker
+on: [push, pull_request]
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --exclude-localhost --exclude-private --verbose --no-progress "*.md" "*.tsx" "*.ts"
+          fail: true

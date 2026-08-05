@@ -1,0 +1,24 @@
+name: Schema Validation
+on: [push]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build
+      - run: npm run start &
+      - name: Validate JSON-LD
+        run: |
+          sleep 3
+          npx tsx -e "
+            const pages = ['/', '/services', '/dentists', '/blog', '/faq'];
+            for (const path of pages) {
+              const res = await fetch('http://localhost:3000' + path);
+              const html = await res.text();
+              const schemas = html.match(/application\/ld\+json[^>]*>(.*?)<\/script>/gs);
+              if (!schemas) console.warn('No JSON-LD on', path);
+              else console.log(path, 'has', schemas.length, 'schemas');
+            }
+          "

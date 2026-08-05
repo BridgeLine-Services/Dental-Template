@@ -1,0 +1,16 @@
+name: Bundle Analysis
+on: [pull_request]
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npm run build
+      - name: Check bundle size
+        run: |
+          SIZE=$(du -sh .next/static/chunks | awk '{print $1}')
+          echo "Total chunks size: $SIZE"
+          find .next/static/chunks -name "*.js" -exec wc -c {} + | sort -n | tail -10

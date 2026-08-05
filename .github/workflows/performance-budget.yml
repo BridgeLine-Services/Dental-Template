@@ -1,0 +1,16 @@
+name: Performance Budget
+on: [pull_request]
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build
+      - name: Check performance budget
+        run: |
+          TOTAL=$(find .next/static -name "*.js" -exec cat {} + | wc -c)
+          echo "Total JS: $((TOTAL / 1024)) KB"
+          if [ $TOTAL -gt 512000 ]; then echo "FAIL: Budget exceeded (500KB)"; exit 1; fi
+          echo "PASS: Within budget"
