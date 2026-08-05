@@ -1,165 +1,235 @@
-# Bright Smile Dental — Website Template
+# Bright Smile Dental — Production Template
 
-A production-ready dental practice website built with **Next.js 14**, **TypeScript**, and **Tailwind CSS**. Features 60+ pages, a patient portal, admin dashboard, live chat, online payments, and full HIPAA compliance.
+A premium, production-ready dental practice platform built with **Next.js 16**, **TypeScript**, **Tailwind CSS**, **NextAuth 5**, and **Prisma 6** (PostgreSQL). Designed for agencies selling dental websites at $2,500–$10,000+ per deployment.
 
 ## Live Demo
 
-Deploy to Vercel in one click: [Deploy](https://vercel.com/new)
+[View deployed site](https://dental-template.vercel.app)
 
-## Features
+## What's Included
 
-### Patient-Facing
-- **Home page** with hero, services grid, dentist profiles, reviews, gallery preview, FAQ, special offers, and office info
-- **20 service pages** with detailed descriptions, benefits, procedure info, recovery timelines, and pricing
-- **4 dentist profile pages** with bios, education, certifications, and reviews
-- **Blog** with 8 SEO-optimized articles and dynamic slug routing
-- **Gallery** with before/after smile transformations
-- **FAQ** with categorized answers
-- **Special Offers** page with active promotions
-- **Online Booking** — 4-step wizard with real-time availability checking
-- **Contact** form with live submission to backend
-- **Emergency** page with 24/7 info
+### Architecture
+- **Next.js 16** (App Router, Turbopack)
+- **NextAuth 5** — credentials + Google OAuth, JWT sessions, 30-min auto-logout
+- **Prisma 6** + **PostgreSQL** — 30+ models with migrations and seed scripts
+- **Tailwind CSS** with custom brand theme
+- **TypeScript** strict mode throughout
+- **Zod** validation on all API inputs
 
-### Interactive Tools
-- **Smile Assessment** — 7-question quiz with personalized treatment recommendations
-- **Cost Estimator** — estimate out-of-pocket costs based on insurance type
-- **Insurance Verification** — check if your insurance is accepted
-- **Virtual Consultations** — telehealth booking info page
+### Security & Compliance
+- Rate limiting (token-bucket per IP)
+- CSRF token protection
+- Input sanitization (HTML stripping, JS protocol removal)
+- 6-role RBAC (Super Admin, Admin, Dentist, Hygienist, Receptionist, Patient)
+- Audit logging (all PHI access)
+- Breach logging
+- PHI redaction utilities
+- Security headers in `next.config.js`:
+  - Content-Security-Policy
+  - Strict-Transport-Security (HSTS)
+  - X-Frame-Options: DENY
+  - Permissions-Policy
+  - Referrer-Policy
+  - X-Content-Type-Options
+- HIPAA Notice of Privacy Practices
+- Automatic session expiration
 
-### Patient Portal
-- **Login / Register** with session persistence
-- **Dashboard** with appointment stats and quick links
-- **Appointments** view (upcoming + history)
-- **Digital Forms** — new patient registration, medical history, HIPAA & treatment consent
-- **Secure Messaging** — chat interface with the dental office
-- **Consent Forms** — treatment, HIPAA, financial responsibility, photography (digital signature)
+### API Layer (36+ Routes)
+```
+/api/appointments     /api/patients         /api/reviews
+/api/contact          /api/newsletter       /api/offers
+/api/providers        /api/insurance-plans  /api/insurance/verify
+/api/faq              /api/gallery          /api/membership/plans
+/api/membership/enroll /api/referrals       /api/waitlist
+/api/payments/create-session /api/consent   /api/forms/submit
+/api/blog/[slug]      /api/services         /api/analytics
+/api/auth/[...nextauth] /api/portal         /api/billing
+/api/documents        /api/messages         /api/settings
+/api/health           /api/sitemap          /api/health-records
+```
 
-### Admin Dashboard
-- **Overview** with live stats (appointments, patients, reviews, messages)
-- **Appointments** management with status updates
-- **Patients** directory
-- **Reviews** moderation (approve/reject)
-- **Blog** post management
-- **Services** and **Dentists** management
-- **Settings** page
+### Patient Portal (7 Pages)
+- Dashboard — upcoming appointments, balance, quick actions
+- Appointments — view, cancel, request reschedule
+- Forms — digital intake, medical history, consent forms
+- Messages — secure messaging with the practice
+- Documents — secure upload/download (HIPAA)
+- Billing — balance, payment history, pay now
+- Settings — profile, security, notifications, privacy
 
-### Compliance & Legal
-- HIPAA Privacy Notice
-- Privacy Policy
-- Terms of Service
+### Production Forms (6 Pages)
+- New Patient Registration (4-step wizard)
+- Medical History
+- Treatment Consent
+- X-Ray Consent
+- Financial Policy Acknowledgment
+- Insurance Assignment
+
+### Dental Business Features (9 Pages)
+- Membership Plans — in-house savings program
+- Referral Program — $50 credit for referring friends
+- Waitlist — cancellation fill-in system
+- Financing Calculator — CareCredit, Cherry, Sunbit + HSA/FSA
+- Online Check-In — pre-appointment check-in
+- Staff Directory — dentist & hygienist profiles
+- Office Tour — virtual tour gallery
+- Multi-Location — multiple practice support
+- AI Receptionist — 24/7 AI chat assistant demo
+
+### Legal & Compliance (10 Pages)
+- HIPAA Notice of Privacy Practices
 - Accessibility Statement
-- Cookie Consent banner (GDPR/CCPA)
+- Cookie Policy
+- Data Retention Policy
+- AI Disclosure
+- Disclaimer
+- No Medical Advice Disclaimer
+- Copyright Notice
+- DMCA Policy
+- Financial Policy
 
-### Payments
-- Stripe checkout integration for online payments
-- Payment success / cancelled pages
+### SEO (7 Schema Components)
+- Organization schema
+- LocalBusiness schema
+- Service schema (per service page)
+- Dentist/Physician schema
+- FAQ schema
+- Breadcrumb schema
+- Review schema
+- Sitemap.xml + robots.txt
+- Canonical URLs, OpenGraph, Twitter cards
 
-### SEO
-- JSON-LD structured data (LocalBusiness, Dentist schema)
-- Dynamic sitemap.xml with all routes
-- robots.txt (admin/portal blocked)
-- Open Graph meta tags
-- Semantic HTML with ARIA labels
+### Accessibility
+- SkipLink component
+- AccessibilityWidget (font size, high contrast, reduced motion, dyslexia font)
+- AriaLive region for announcements
+- Keyboard navigation support
+- ARIA landmarks throughout
 
-### Backend (Base44 Platform)
-- 14 entity schemas: Patient, Appointment, Provider, Service, Review, BlogPost, SpecialOffer, GalleryItem, FAQItem, InsurancePlan, NewsletterSubscriber, PatientForm, Treatment, InventoryItem, ContactMessage
-- 8 deployed backend functions: bookAppointment, submitContactForm, submitReview, newsletterSignup, getDashboardStats, verifyInsurance, submitPatientForm, createPaymentSession
-- 3 automation workflows: appointment confirmation, daily reminders, post-visit follow-up survey
+### CI/CD Workflows (16 GitHub Actions)
+1. Node.js CI — build & test on every PR
+2. CodeQL — security analysis
+3. Lighthouse — performance, accessibility, SEO, best practices
+4. Playwright — end-to-end testing
+5. axe-core — automated accessibility testing
+6. Dependency Review — vulnerability checks
+7. Secret Scanning — prevent leaked API keys
+8. Bundle Analysis — detect oversized JS bundles
+9. Link Checker — broken link detection
+10. Sitemap Validation
+11. Schema Validation — JSON-LD structured data
+12. Spell Check — cspell
+13. Docker Build Test
+14. Preview Deploy Validation
+15. Security Headers Test
+16. Performance Budget
+
+### Performance
+- Static generation (SSG) for 132 pages
+- Image optimization (AVIF/WebP)
+- Font optimization
+- Code splitting
+- Service worker + offline page
+- Web manifest
+
+### Database (30+ Prisma Models)
+User, Account, Session, VerificationToken, RefreshToken,
+Patient, Provider, Service, Appointment, Treatment,
+Review, PatientForm, ConsentRecord, PatientDocument,
+SecureMessage, ContactMessage, AuditLog, BreachLog,
+BlogPost, SpecialOffer, GalleryItem, FAQItem,
+InsurancePlan, NewsletterSubscriber, InventoryItem,
+MembershipPlan, MembershipEnrollment, Referral,
+WaitlistEntry, Payment, Invoice
+
+### DevOps
+- Dockerfile + .dockerignore
+- vercel.json (deployment config)
+- prisma/seed.ts (demo data)
+- scripts/backup.sh (PostgreSQL backup)
+- lib/db/queries.ts (typed query helpers)
+- lib/db/transactions.ts (transaction wrappers)
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 14+
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/BridgeLine-Services/Dental-Template.git
+cd Dental-Template
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your database URL, NextAuth secret, Stripe keys, etc.
+
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma db push
+
+# Seed the database with demo data
+npx prisma db seed
+
+# Start the development server
+npm run dev
+```
+
+### Environment Variables
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/dental"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="your-google-oauth-id"
+GOOGLE_CLIENT_SECRET="your-google-oauth-secret"
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+```
+
+## Deployment
+
+### Vercel (Recommended)
+1. Import the repository on [vercel.com](https://vercel.com)
+2. Add environment variables
+3. Deploy — Vercel auto-detects Next.js
+
+### Docker
+```bash
+docker build -t dental-template .
+docker run -p 3000:3000 dental-template
+```
 
 ## Tech Stack
 
 | Category | Technology |
 |----------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| Icons | Lucide React, React Icons |
-| Backend | Base44 (serverless functions + MongoDB) |
+| Framework | Next.js 16 |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 3 |
+| Auth | NextAuth 5 (Auth.js) |
+| Database | PostgreSQL + Prisma 6 |
+| Validation | Zod |
 | Payments | Stripe |
+| Testing | Playwright, axe-core |
+| CI/CD | GitHub Actions (16 workflows) |
+| Containerization | Docker |
 | Deployment | Vercel |
-
-## Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/BridgeLine-Services/Dental-Template.git
-cd Dental-Template/dental-template
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## Project Structure
-
-```
-dental-template/
-├── app/                    # Next.js App Router pages
-│   ├── (public)/           # Public-facing pages
-│   ├── admin/              # Admin dashboard
-│   ├── portal/             # Patient portal
-│   ├── services/           # 20 service pages
-│   ├── blog/               # Blog with dynamic routes
-│   ├── dentists/           # Dentist profiles
-│   ├── booking/            # Online booking wizard
-│   ├── payment/            # Stripe payment
-│   ├── consent-forms/      # Digital consent forms
-│   ├── hipaa-notice/       # HIPAA compliance
-│   └── ...
-├── components/
-│   ├── home/               # Homepage sections
-│   ├── layout/             # Header, Footer
-│   ├── shared/             # LiveChat, CookieConsent, ServiceDetail, StructuredData
-│   └── ui/                 # Button, Card, Badge
-├── lib/
-│   ├── api.ts              # Base44 API client
-│   ├── data.ts             # Static data (services, dentists, blog posts, config)
-│   ├── seo.ts              # SEO metadata helper
-│   └── utils.ts            # Utility functions
-└── public/                # Static assets
-```
-
-## Customization
-
-### Brand Colors
-Update the `brand` color palette in `tailwind.config.ts` to match your practice's branding.
-
-### Practice Information
-Edit `lib/data.ts` to update:
-- Practice name, phone, email, address
-- Office hours
-- Services and pricing
-- Dentist profiles
-- Blog posts
-- FAQ entries
-
-### Backend Integration
-The frontend connects to Base44 backend functions. Update the API base URL in `lib/api.ts` if using a different backend.
-
-### Stripe Payments
-Set the `STRIPE_SECRET_KEY` environment variable to enable online payments.
-
-## Deployment
-
-### Vercel (Recommended)
-1. Push to GitHub
-2. Import the repository at [vercel.com/new](https://vercel.com/new)
-3. Set the root directory to `dental-template`
-4. Deploy
-
-### Environment Variables
-| Variable | Description |
-|----------|-------------|
-| `STRIPE_SECRET_KEY` | Stripe API key for payment processing |
 
 ## License
 
-MIT License — free to use for any dental practice.
+This template is licensed for use by BridgeLine Services. See LICENSE for details.
+
+## Repository
+
+[github.com/BridgeLine-Services/Dental-Template](https://github.com/BridgeLine-Services/Dental-Template)
