@@ -177,3 +177,87 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* === Accessibility Styles === */
+
+/* High contrast mode */
+html.high-contrast {
+  filter: contrast(1.5) saturate(1.2);
+}
+html.high-contrast * {
+  border-color: #000 !important;
+}
+html.high-contrast a {
+  text-decoration: underline !important;
+  color: #0000EE !important;
+}
+html.high-contrast button:focus,
+html.high-contrast a:focus,
+html.high-contrast input:focus {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
+}
+
+/* Reduced motion */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Dyslexia-friendly font */
+html.dyslexia-font body {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Arial', sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+  line-height: 1.8;
+}
+
+/* Color blind filters */
+html[data-color-blind="protanopia"] {
+  filter: url('#protanopia-filter');
+}
+html[data-color-blind="deuteranopia"] {
+  filter: url('#deuteranopia-filter');
+}
+html[data-color-blind="tritanopia"] {
+  filter: url('#tritanopia-filter');
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #1e293b;
+  color: white;
+  padding: 8px 16px;
+  z-index: 1000;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus visible improvements */
+*:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

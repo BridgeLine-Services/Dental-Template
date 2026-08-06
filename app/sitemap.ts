@@ -17,7 +17,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/legal/cookie-policy", "/legal/disclaimer", "/legal/copyright", "/legal/dmca",
     "/legal/data-retention", "/legal/ai-disclosure", "/legal/accessibility",
     "/legal/no-medical-advice", "/legal/financial-policy", "/legal",
-  ].map(route => ({ url: `${baseUrl}${route}`, lastModified, changeFrequency: "weekly" as const, priority: route === "" ? 1 : 0.8 }));
+    "/offline",
+  ].map(route => ({
+    url: `${baseUrl}${route}`,
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: route === "" ? 1 : 0.8,
+  }));
 
   const serviceSlugs = [
     "general-dentistry", "cosmetic-dentistry", "teeth-whitening", "dental-implants",
@@ -25,15 +31,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "extractions", "dentures", "pediatric-dentistry", "emergency-dentistry",
     "gum-disease-treatment", "sedation-dentistry", "oral-surgery",
     "wisdom-teeth-removal", "preventive-care",
-  ].map(slug => ({ url: `${baseUrl}/services/${slug}`, lastModified, changeFrequency: "monthly" as const, priority: 0.7 }));
-
-  const dentistIds = ["1", "2", "3", "4"].map(id => ({ url: `${baseUrl}/dentists/${id}`, lastModified, changeFrequency: "monthly" as const, priority: 0.6 }));
+  ].map(slug => ({
+    url: `${baseUrl}/services/${slug}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
 
   const blogSlugs = [
     "proper-brushing-technique", "flossing-importance", "teeth-whitening-options",
     "dental-implants-guide", "childrens-dental-care", "invisalign-treatment",
     "gum-disease-prevention", "oral-health-tips",
-  ].map(slug => ({ url: `${baseUrl}/blog/${slug}`, lastModified, changeFrequency: "monthly" as const, priority: 0.5 }));
+  ].map(slug => ({
+    url: `${baseUrl}/blog/${slug}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
 
-  return [...staticRoutes, ...serviceSlugs, ...dentistIds, ...blogSlugs];
+  return [...staticRoutes, ...serviceSlugs, ...blogSlugs];
 }

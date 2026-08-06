@@ -27,6 +27,8 @@ async function main() {
   const adminPass = await bcrypt.hash('AdminPass123!', 10)
   const patientPass = await bcrypt.hash('PatientPass123!', 10)
   
+  const superAdminPass = await bcrypt.hash('SuperAdmin123!', 10)
+  const superAdminUser = await prisma.user.create({ data: { email: 'superadmin@brightsmile.com', name: 'Super Admin', passwordHash: superAdminPass, role: UserRole.SUPER_ADMIN } })
   const adminUser = await prisma.user.create({ data: { email: 'admin@brightsmile.com', name: 'Admin User', passwordHash: adminPass, role: UserRole.ADMIN } })
   const patientUser = await prisma.user.create({ data: { email: 'patient@example.com', name: 'John Doe', passwordHash: patientPass, role: UserRole.PATIENT } })
 
@@ -117,7 +119,9 @@ async function main() {
   ] })
 
   console.log('Database seeded successfully!')
-  console.log('Admin login: admin@brightsmile.com / AdminPass123!')
+  console.log('Super Admin login: superadmin@brightsmile.com / SuperAdmin123!')
+console.log('Admin login: admin@brightsmile.com / AdminPass123!')
+console.log('Patient login: patient@example.com / PatientPass123!')
   console.log('Patient login: patient@example.com / PatientPass123!')
 }
 
