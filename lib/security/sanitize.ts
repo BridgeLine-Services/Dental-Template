@@ -1,10 +1,14 @@
 // Input sanitization utilities
 export function sanitizeString(input: string): string {
   return input
-    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+    .trim()
     .replace(/javascript:/gi, '') // Remove js: protocol
     .replace(/on\w+=/gi, '') // Remove event handlers
-    .trim()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 export function sanitizeEmail(input: string): string {
